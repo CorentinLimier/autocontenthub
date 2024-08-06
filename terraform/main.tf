@@ -184,32 +184,35 @@ resource "aws_lambda_function" "generate_lambda_function" {
   runtime          = "python3.10"
   handler          = "lambda_function.lambda_handler"
   timeout          = 60
-  environment {
-    variables = {
-      bucket_name = aws_s3_bucket.domain_bucket.id
-    }
-  }
 }
 
 # EventBridge
 
 resource "aws_cloudwatch_event_rule" "every_day" {
-  name                = "every_day_rule"
+  for_each            = var.contents
+  name                = "${each.key}_every_day_rule"
   description         = "trigger generate_content every day"
-  schedule_expression = "cron(0 1 * * ? *)"
+  schedule_expression = "cron(42 15 * * ? *)"
   tags                = aws_servicecatalogappregistry_application.autocontenthub_app.application_tag
 }
 
 resource "aws_cloudwatch_event_target" "lambda_target" {
-  rule      = aws_cloudwatch_event_rule.every_day.name
+  for_each = var.contents
+  rule     = aws_cloudwatch_event_rule.every_day[each.key].name
+  input = jsonencode({
+    bucket = aws_s3_bucket.domain_bucket.id,
+    folder = each.key,
+    prompt = each.value.prompt,
+  })
   target_id = "lambda-function-target"
   arn       = aws_lambda_function.generate_lambda_function.arn
 }
 
 resource "aws_lambda_permission" "allow_cloudwatch" {
-  statement_id  = "AllowExecutionFromCloudWatch"
+  for_each      = var.contents
+  statement_id  = "AllowExecutionFromCloudWatch${each.key}"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.generate_lambda_function.function_name
   principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.every_day.arn
+  source_arn    = aws_cloudwatch_event_rule.every_day[each.key].arn
 }
