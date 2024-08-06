@@ -10,19 +10,35 @@ resource "aws_servicecatalogappregistry_application" "onegameperday_app" {
 
 # Bucket 
 
-resource "random_string" "random" {
-  length  = 6
-  special = false
-  upper   = false
-}
-
-resource "aws_s3_bucket" "bucket" {
-  bucket = "revbucket-${random_string.random.result}"
+resource "aws_s3_bucket" "domain_bucket" {
+  bucket = var.domain_name
   tags   = aws_servicecatalogappregistry_application.onegameperday_app.application_tag
 }
 
+resource "aws_s3_bucket" "subdomain_bucket" {
+  bucket = "www.${var.domain_name}"
+  tags   = aws_servicecatalogappregistry_application.onegameperday_app.application_tag
+}
+
+resource "aws_s3_bucket" "log_bucket" {
+  bucket = "log.${var.domain_name}"
+  tags   = aws_servicecatalogappregistry_application.onegameperday_app.application_tag
+}
+
+resource "aws_s3_object" "object" {
+  bucket = aws_s3_bucket.log_bucket.id
+  key    = "log/"
+}
+
+resource "aws_s3_bucket_logging" "server_logging" {
+  bucket = aws_s3_bucket.domain_bucket.id
+
+  target_bucket = aws_s3_bucket.log_bucket.id
+  target_prefix = "log/"
+}
+
 resource "aws_s3_bucket_website_configuration" "blog" {
-  bucket = aws_s3_bucket.bucket.id
+  bucket = aws_s3_bucket.domain_bucket.id
   index_document {
     suffix = "index.html"
   }
@@ -31,8 +47,17 @@ resource "aws_s3_bucket_website_configuration" "blog" {
   }
 }
 
+resource "aws_s3_bucket_website_configuration" "subdomain_redirect" {
+  bucket = aws_s3_bucket.subdomain_bucket.bucket
+
+  redirect_all_requests_to {
+    host_name = var.domain_name
+    protocol  = "http"
+  }
+}
+
 resource "aws_s3_bucket_public_access_block" "public_access_block" {
-  bucket                  = aws_s3_bucket.bucket.id
+  bucket                  = aws_s3_bucket.domain_bucket.id
   block_public_acls       = false
   block_public_policy     = false
   ignore_public_acls      = false
@@ -41,7 +66,7 @@ resource "aws_s3_bucket_public_access_block" "public_access_block" {
 
 resource "aws_s3_object" "upload_object" {
   for_each     = fileset("../static/", "*")
-  bucket       = aws_s3_bucket.bucket.id
+  bucket       = aws_s3_bucket.domain_bucket.id
   key          = each.value
   source       = "../static/${each.value}"
   etag         = filemd5("../static/${each.value}")
@@ -50,7 +75,7 @@ resource "aws_s3_object" "upload_object" {
 }
 
 resource "aws_s3_bucket_policy" "allow_access_from_everywhere" {
-  bucket = aws_s3_bucket.bucket.id
+  bucket = aws_s3_bucket.domain_bucket.id
   policy = data.aws_iam_policy_document.allow_access_from_everywhere.json
 }
 
@@ -66,7 +91,7 @@ data "aws_iam_policy_document" "allow_access_from_everywhere" {
     ]
 
     resources = [
-      "${aws_s3_bucket.bucket.arn}/*",
+      "${aws_s3_bucket.domain_bucket.arn}/*",
     ]
   }
 }
@@ -129,7 +154,7 @@ resource "aws_iam_policy" "lambda_bucket_policy" {
           "s3:*",
         ]
         Effect   = "Allow"
-        Resource = "${aws_s3_bucket.bucket.arn}/*"
+        Resource = "${aws_s3_bucket.domain_bucket.arn}/*"
       },
   ] })
   tags = aws_servicecatalogappregistry_application.onegameperday_app.application_tag
@@ -161,7 +186,7 @@ resource "aws_lambda_function" "generate_lambda_function" {
   timeout          = 60
   environment {
     variables = {
-      bucket_name = aws_s3_bucket.bucket.id
+      bucket_name = aws_s3_bucket.domain_bucket.id
     }
   }
 }
