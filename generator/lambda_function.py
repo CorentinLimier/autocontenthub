@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 import re
@@ -6,26 +7,23 @@ import boto3
 import urllib3
 
 PROMPT = """
-Create an engaging and addictive game concept that can be played in about one minute. Game can end due to time limitation
-or because character died.The game should be simple to understand and easy to play, encouraging players to retry to beat 
-their high scores and climb the leaderboard. Players should use either the mouse to click or the keyboard to control 
-the character (if applicable). The game must not rely on any images or audio, ensuring a purely text-based or minimalist visual experience.
+Create an engaging and addictive game concept that can be played in about one minute. 
+Game can end due to time limitation or because an error was made.
 
-Game Requirements:
+The score and best score should be displayed.
+At the end of the game, don't ask the player its nickname. 
+Provide clear instructions on how to play the game. 
+If there are time limit, display the remaining time.
 
-Duration: Each game session should last around one minute.
-Objective: Achieve the highest score possible within the time limit or before character dies.
-Controls: Simple and intuitive controls using mouse clicks or keyboard inputs.
-Replayability: The game should be highly replayable and addictive, motivating players to improve their scores.
-Instructions: Clearly state the goal and basic instructions on the game page.
-Leaderboard: At the end of each game, prompt the user to enter their nickname for the leaderboard.
-State Management: Ensure the game state is reset properly when the player opts for a rematch.
-Bug-Free: The game must be free of bugs to ensure a smooth user experience.
+Code should be in one html file. 
 
-Provide the HTML/CSS/Javascript code to build the game. Basic instructions and controls should be added on top of the game, and
-the score should be displayed.
+Make sure all components of the game are visible and respond correctly to the controls. 
+Game should be fully playable, I don't want to have to update code to make it work. 
+Ensure the game state is reset properly when the player opts for a rematch
 
-Only return the code in your answer in one file that combines all.
+Make it original and avoid games that require to type words. 
+The game should be simple to understand and easy to play, encouraging players to retry to beat their high scores.
+Players should use either the mouse to click or the keyboard to control the game or a character.
 """
 
 
@@ -74,8 +72,9 @@ def lambda_handler(event, context):
     code = extract_html_code(openai_response)
 
     bucket = os.environ["bucket_name"]
-    filename = "index.html"
+    filename = f"{datetime.datetime.today().strftime('%Y%m%d')}.html"
     write_to_bucket(code, bucket, filename)
+    write_to_bucket(code, bucket, "index.html")
 
     return {"statusCode": 200, "body": "File uploaded successfully."}
 

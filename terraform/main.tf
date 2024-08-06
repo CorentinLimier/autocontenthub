@@ -158,7 +158,7 @@ resource "aws_lambda_function" "generate_lambda_function" {
   role             = aws_iam_role.lambda_role.arn
   runtime          = "python3.10"
   handler          = "lambda_function.lambda_handler"
-  timeout          = 30
+  timeout          = 60
   environment {
     variables = {
       bucket_name = aws_s3_bucket.bucket.id
