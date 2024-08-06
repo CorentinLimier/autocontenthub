@@ -1,8 +1,8 @@
-AutoContentHub (autocontenthub.com)
+# [AutoContentHub.com](http://www.autocontenthub.com)
 
 # Concept
 
-This project creates lambda function that runs once a day to ask ChatGPT to create a new content on a static website.
+This project creates lambda function that runs once a day to ask ChatGPT to create a new content and deploy it to a static website.
 
 # Resources 
 
