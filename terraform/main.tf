@@ -93,6 +93,29 @@ data "aws_iam_policy_document" "allow_access_from_everywhere" {
   }
 }
 
+# Dynamo
+
+resource "aws_dynamodb_table" "dynamotable" {
+  name = "AutoContentHub"
+
+  billing_mode = "PAY_PER_REQUEST"
+
+  hash_key  = "section"
+  range_key = "date"
+
+  attribute {
+    name = "section"
+    type = "S"
+  }
+
+  attribute {
+    name = "date"
+    type = "S"
+  }
+
+  tags = aws_servicecatalogappregistry_application.autocontenthub_app.application_tag
+}
+
 # Certificate
 
 resource "aws_acm_certificate" "cert-my-aws-project-com" {
@@ -136,23 +159,14 @@ resource "aws_cloudfront_distribution" "subdomain-distribution" {
   default_root_object = "index.html"
 
   default_cache_behavior {
-    allowed_methods  = ["GET", "HEAD"]
-    cached_methods   = ["GET", "HEAD"]
+    allowed_methods = ["GET", "HEAD"]
+    cached_methods  = ["GET", "HEAD"]
+    #  Using the CachingDisabled managed policy ID
+    cache_policy_id = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+
     target_origin_id = "S3 static website"
 
     viewer_protocol_policy = "redirect-to-https"
-
-    min_ttl     = 0
-    default_ttl = 3600
-    max_ttl     = 86400
-
-    forwarded_values {
-      query_string = false
-
-      cookies {
-        forward = "none"
-      }
-    }
 
     function_association {
       event_type   = "viewer-request"
@@ -196,23 +210,14 @@ resource "aws_cloudfront_distribution" "domain-distribution" {
   default_root_object = "index.html"
 
   default_cache_behavior {
-    allowed_methods  = ["GET", "HEAD"]
-    cached_methods   = ["GET", "HEAD"]
+    allowed_methods = ["GET", "HEAD"]
+    cached_methods  = ["GET", "HEAD"]
+    #  Using the CachingDisabled managed policy ID
+    cache_policy_id = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+
     target_origin_id = "S3-Origin"
 
     viewer_protocol_policy = "redirect-to-https"
-
-    min_ttl     = 0
-    default_ttl = 3600
-    max_ttl     = 86400
-
-    forwarded_values {
-      query_string = false
-
-      cookies {
-        forward = "none"
-      }
-    }
 
     function_association {
       event_type   = "viewer-request"
@@ -360,6 +365,32 @@ resource "aws_iam_policy" "lambda_bucket_policy" {
         Resource = "${aws_s3_bucket.domain_bucket.arn}/*"
       },
   ] })
+
+  tags = aws_servicecatalogappregistry_application.autocontenthub_app.application_tag
+}
+
+resource "aws_iam_policy" "lambda_dynamo_policy" {
+  name = "lambda_dynamo_policy"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = [
+          "dynamodb:DeleteItem",
+          "dynamodb:DescribeTable",
+          "dynamodb:GetItem",
+          "dynamodb:GetRecords",
+          "dynamodb:ListTables",
+          "dynamodb:PutItem",
+          "dynamodb:Query",
+          "dynamodb:Scan",
+          "dynamodb:UpdateItem",
+          "dynamodb:UpdateTable",
+        ]
+        Effect   = "Allow"
+        Resource = "${aws_dynamodb_table.dynamotable.arn}"
+      },
+  ] })
   tags = aws_servicecatalogappregistry_application.autocontenthub_app.application_tag
 }
 
@@ -371,6 +402,11 @@ resource "aws_iam_role_policy_attachment" "lambda_sm" {
 resource "aws_iam_role_policy_attachment" "lambda_bucket" {
   role       = aws_iam_role.lambda_role.name
   policy_arn = aws_iam_policy.lambda_bucket_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_dynamo" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = aws_iam_policy.lambda_dynamo_policy.arn
 }
 
 data "archive_file" "python_lambda_package" {
