@@ -109,6 +109,15 @@ resource "aws_acm_certificate" "cert-my-aws-project-com" {
 
 # Cloudfront
 
+# https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/example-function-add-index.html
+resource "aws_cloudfront_function" "index_function" {
+  name    = "add_index"
+  runtime = "cloudfront-js-2.0"
+  comment = "Add index.html to routes without extension"
+  publish = true
+  code    = file("${path.module}/index_function.js")
+}
+
 resource "aws_cloudfront_distribution" "subdomain-distribution" {
   origin {
     domain_name = aws_s3_bucket_website_configuration.subdomain_redirect.website_endpoint
@@ -145,6 +154,17 @@ resource "aws_cloudfront_distribution" "subdomain-distribution" {
       }
     }
 
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.index_function.arn
+    }
+
+  }
+
+  custom_error_response {
+    error_code         = "403"
+    response_code      = "404"
+    response_page_path = "/error.html"
   }
 
   viewer_certificate {
@@ -194,6 +214,16 @@ resource "aws_cloudfront_distribution" "domain-distribution" {
       }
     }
 
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.index_function.arn
+    }
+  }
+
+  custom_error_response {
+    error_code         = "403"
+    response_code      = "404"
+    response_page_path = "/error.html"
   }
 
   viewer_certificate {
