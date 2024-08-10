@@ -48,8 +48,13 @@ variable "contents" {
       Find a topic/ a technology that is specific and develop it. 
       Article should rely on concrete examples and codes snippets if applicable.
       I want a definitive verison that I can directly publish on my website. 
-      The output should be in one html file. Make to escape html characters 
-      inside code blocks if applicable.
+      The output should be in one html file. Make surer to escape html characters 
+      inside code blocks if applicable by replacing : 
+      - < with &lt;
+      - > with &gt;
+      - & with &amp;
+      - " with &quot;
+      - ' with &#39;
       EOF
     }
     product = {
@@ -76,8 +81,13 @@ variable "contents" {
       Find a topic/ a technology that is specific and develop it. 
       Article should rely on concrete examples and codes snippets if applicable.
       I want a definitive verison that I can directly publish on my website. 
-      The output should be in one html file. Make to escape html characters 
-      inside code blocks if applicable.
+      The output should be in one html file. Make sure to escape html characters 
+      inside code blocks if applicable by replacing : 
+      - < with &lt;
+      - > with &gt;
+      - & with &amp;
+      - " with &quot;
+      - ' with &#39;
       EOF
     }
     startup = {
@@ -114,6 +124,21 @@ variable "contents" {
       Article should rely on concrete examples.
       I want a definitive verison that I can directly publish on my website. 
       The output should be in one html file 
+      EOF
+    }
+    devops = {
+      prompt = <<EOF
+      Create an article for Devops / SRE. 
+      Find a topic/ a technology that is specific and develop it. 
+      Article should rely on concrete examples and codes snippets if applicable.
+      I want a definitive verison that I can directly publish on my website. 
+      The output should be in one html file. Make sure to escape html characters 
+      inside code blocks if applicable by replacing : 
+      - < with &lt;
+      - > with &gt;
+      - & with &amp;
+      - " with &quot;
+      - ' with &#39;
       EOF
     }
   }

@@ -113,6 +113,12 @@ resource "aws_dynamodb_table" "dynamotable" {
     type = "S"
   }
 
+  global_secondary_index {
+    name            = "date-index"
+    hash_key        = "date"
+    projection_type = "ALL"
+  }
+
   tags = aws_servicecatalogappregistry_application.autocontenthub_app.application_tag
 }
 
@@ -387,8 +393,11 @@ resource "aws_iam_policy" "lambda_dynamo_policy" {
           "dynamodb:UpdateItem",
           "dynamodb:UpdateTable",
         ]
-        Effect   = "Allow"
-        Resource = "${aws_dynamodb_table.dynamotable.arn}"
+        Effect = "Allow"
+        Resource = [
+          "${aws_dynamodb_table.dynamotable.arn}",
+          "${aws_dynamodb_table.dynamotable.arn}/index/*"
+        ]
       },
   ] })
   tags = aws_servicecatalogappregistry_application.autocontenthub_app.application_tag
@@ -409,49 +418,91 @@ resource "aws_iam_role_policy_attachment" "lambda_dynamo" {
   policy_arn = aws_iam_policy.lambda_dynamo_policy.arn
 }
 
-data "archive_file" "python_lambda_package" {
+data "archive_file" "generator_package" {
   type        = "zip"
   source_file = "../generator/lambda_function.py"
   output_path = "generator.zip"
 }
 
-resource "aws_lambda_function" "generate_lambda_function" {
+resource "aws_lambda_function" "generator_function" {
   function_name    = "generate_content"
   filename         = "generator.zip"
-  source_code_hash = data.archive_file.python_lambda_package.output_base64sha256
+  source_code_hash = data.archive_file.generator_package.output_base64sha256
   role             = aws_iam_role.lambda_role.arn
   runtime          = "python3.10"
   handler          = "lambda_function.lambda_handler"
   timeout          = 60
+  tags             = aws_servicecatalogappregistry_application.autocontenthub_app.application_tag
+}
+
+data "archive_file" "frontend_package" {
+  type        = "zip"
+  source_file = "../frontend/lambda_function.py"
+  output_path = "frontend.zip"
+}
+
+resource "aws_lambda_function" "frontend_function" {
+  function_name    = "generate_frontend"
+  filename         = "frontend.zip"
+  source_code_hash = data.archive_file.frontend_package.output_base64sha256
+  role             = aws_iam_role.lambda_role.arn
+  runtime          = "python3.10"
+  handler          = "lambda_function.lambda_handler"
+  timeout          = 60
+  tags             = aws_servicecatalogappregistry_application.autocontenthub_app.application_tag
 }
 
 # EventBridge
 
-resource "aws_cloudwatch_event_rule" "every_day" {
+resource "aws_cloudwatch_event_rule" "schedule" {
   for_each            = var.contents
-  name                = "${each.key}_every_day_rule"
+  name                = "${each.key}_schedule_rule"
   description         = "trigger generate_content every day"
-  schedule_expression = "cron(0 1 * * ? *)"
+  schedule_expression = "cron(5 0 * * ? *)"
   tags                = aws_servicecatalogappregistry_application.autocontenthub_app.application_tag
 }
 
 resource "aws_cloudwatch_event_target" "lambda_target" {
   for_each = var.contents
-  rule     = aws_cloudwatch_event_rule.every_day[each.key].name
+  rule     = aws_cloudwatch_event_rule.schedule[each.key].name
   input = jsonencode({
     bucket = aws_s3_bucket.domain_bucket.id,
     folder = each.key,
     prompt = each.value.prompt,
   })
   target_id = "lambda-function-target"
-  arn       = aws_lambda_function.generate_lambda_function.arn
+  arn       = aws_lambda_function.generator_function.arn
 }
 
 resource "aws_lambda_permission" "allow_cloudwatch" {
   for_each      = var.contents
   statement_id  = "AllowExecutionFromCloudWatch${each.key}"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.generate_lambda_function.function_name
+  function_name = aws_lambda_function.generator_function.function_name
   principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.every_day[each.key].arn
+  source_arn    = aws_cloudwatch_event_rule.schedule[each.key].arn
+}
+
+resource "aws_cloudwatch_event_rule" "frontend_schedule" {
+  name                = "frontend_schedule_rule"
+  description         = "trigger generate_frontend every day"
+  schedule_expression = "cron(10 0 * * ? *)"
+  tags                = aws_servicecatalogappregistry_application.autocontenthub_app.application_tag
+}
+
+resource "aws_cloudwatch_event_target" "frontend_lambda_target" {
+  rule = aws_cloudwatch_event_rule.frontend_schedule.name
+  input = jsonencode({
+    bucket = aws_s3_bucket.domain_bucket.id,
+  })
+  target_id = "lambda-function-target"
+  arn       = aws_lambda_function.frontend_function.arn
+}
+
+resource "aws_lambda_permission" "frontend_allow_cloudwatch" {
+  statement_id  = "AllowExecutionFromCloudWatchFrontend"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.frontend_function.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.frontend_schedule.arn
 }

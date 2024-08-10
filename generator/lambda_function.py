@@ -49,7 +49,7 @@ def get_dynamo_last_items(folder: str) -> list[str]:
     table = dynamodb.Table("AutoContentHub")
     response = table.query(
         KeyConditionExpression=Key("section").eq(folder),
-        Limit=50,
+        Limit=100,
         ScanIndexForward=False,
     )
 
@@ -70,6 +70,10 @@ def lambda_handler(event, context):
     bucket = event["bucket"]
     folder = event["folder"]
     prompt = event["prompt"]
+    if "date" in event:
+        date_str = event["date"]
+    else:
+        date_str = datetime.datetime.today().strftime("%Y%m%d")
 
     last_assets = get_dynamo_last_items(folder)
     if last_assets:
@@ -84,7 +88,7 @@ def lambda_handler(event, context):
     Your answer should be ONLY a json with following structure : 
     {
         "title": "title of the asset generated",
-        "description": "A catchy description of the asset in 2 or 3 sentences",
+        "description": "An interesting description of the asset in 2 or 3 sentences",
         "html": "html code of the generated asset"
     }
     Don't wrap the json by "```"
@@ -95,13 +99,9 @@ def lambda_handler(event, context):
     title = openai_response["title"]
     description = openai_response["description"]
 
-    today_str = datetime.datetime.today().strftime("%Y%m%d")
-    today_str = "20240811"
-
-    filename = f"{today_str}.html"
+    filename = f"{date_str}.html"
     write_to_bucket(code, bucket, f"{folder}/{filename}")
-    write_to_bucket(code, bucket, f"{folder}/index.html")
-    put_dynamo_item(folder, today_str, title, description)
+    put_dynamo_item(folder, date_str, title, description)
 
     return {"statusCode": 200, "body": "File uploaded successfully."}
 
