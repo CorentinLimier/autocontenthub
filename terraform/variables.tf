@@ -48,7 +48,8 @@ variable "contents" {
       Find a topic/ a technology that is specific and develop it. 
       Article should rely on concrete examples and codes snippets if applicable.
       I want a definitive verison that I can directly publish on my website. 
-      The output should be in one html file 
+      The output should be in one html file. Make to escape html characters 
+      inside code blocks if applicable.
       EOF
     }
     product = {
@@ -75,7 +76,8 @@ variable "contents" {
       Find a topic/ a technology that is specific and develop it. 
       Article should rely on concrete examples and codes snippets if applicable.
       I want a definitive verison that I can directly publish on my website. 
-      The output should be in one html file 
+      The output should be in one html file. Make to escape html characters 
+      inside code blocks if applicable.
       EOF
     }
     startup = {

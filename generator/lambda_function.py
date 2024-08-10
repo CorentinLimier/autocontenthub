@@ -26,24 +26,19 @@ def openai_prompt(prompt: str, token: str) -> dict:
     return json.loads(response.data)["choices"][0]["message"]["content"]
 
 
-def extract_html_code(text: dict) -> str:
-    code_regex = r"<html[\s\S]*</html>"
-    html_code = re.findall(code_regex, text)[0]
-    return html_code
-
-
 def write_to_bucket(content: str, bucket: str, filename: str) -> None:
     s3 = boto3.client("s3")
     s3.put_object(Body=content, Bucket=bucket, Key=filename, ContentType="text/html")
 
 
-def put_dynamo_item(section: str, date: str, description: str) -> None:
+def put_dynamo_item(section: str, date: str, title: str, description: str) -> None:
     dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table("AutoContentHub")
     table.put_item(
         Item={
             "section": section,
             "date": date,
+            "title": title,
             "description": description,
         }
     )
@@ -58,7 +53,7 @@ def get_dynamo_last_items(folder: str) -> list[str]:
         ScanIndexForward=False,
     )
 
-    return [item["description"] for item in response["Items"]]
+    return [f'{item["title"]}: {item["description"]}' for item in response["Items"]]
 
 
 def get_secret(secret_name: str) -> str:
@@ -86,34 +81,53 @@ def lambda_handler(event, context):
         """
 
     prompt += """
-    Your answer should be formatted like this and you need to respect this :
-    - on the first line : provide a title and a brief description of what you generate
-    - after, provide the html code of what you generate
+    Your answer should be ONLY a json with following structure : 
+    {
+        "title": "title of the asset generated",
+        "description": "A catchy description of the asset in 2 or 3 sentences",
+        "html": "html code of the generated asset"
+    }
+    Don't wrap the json by "```"
     """
 
-    print(prompt)
-
-    openai_response = openai_prompt(prompt, openai_token)
-    code = extract_html_code(openai_response)
-    description = openai_response.split("\n")[0]
+    openai_response = json.loads(openai_prompt(prompt, openai_token))
+    code = openai_response["html"]
+    title = openai_response["title"]
+    description = openai_response["description"]
 
     today_str = datetime.datetime.today().strftime("%Y%m%d")
+    today_str = "20240811"
 
     filename = f"{today_str}.html"
     write_to_bucket(code, bucket, f"{folder}/{filename}")
     write_to_bucket(code, bucket, f"{folder}/index.html")
-    put_dynamo_item(folder, today_str, description)
+    put_dynamo_item(folder, today_str, title, description)
 
     return {"statusCode": 200, "body": "File uploaded successfully."}
 
 
 def local_test():
-    prompt = "Create a DataEngineering newsletter content in html. "
+    prompt = """
+      Create an article for developers. 
+      Find a topic/ a technology that is specific and develop it. 
+      Article should rely on concrete examples and codes snippets if applicable.
+      I want a definitive verison that I can directly publish on my website. 
+      The output should be in one html file. Make to escape html characters 
+      inside code blocks if applicable.
+    """
+    prompt += """
+    Your answer should be ONLY a json with following structure : 
+    {
+        "title": "title of the asset generated",
+        "description": "A catchy description of the asset in 2 or 3 sentences",
+        "html": "html code of the generated asset"
+    }
+    Don't wrap the json by "```"
+    """
     openai_token = os.environ["OPENAI_API_KEY"]
     openai_response = openai_prompt(prompt, openai_token)
     print(openai_response)
-    code = extract_html_code(openai_response)
-    print(code)
+    print(json.loads(openai_response)["html"])
 
 
 if __name__ == "__main__":
