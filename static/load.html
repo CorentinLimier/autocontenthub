@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Load HTML and Modify CSS</title>
+    <style>
+        /* Add base CSS for layout and links */
+        #content {
+            position: relative;
+            display: none;
+            /* Hide content initially */
+            /* Needed for absolute positioning of links */
+        }
+
+        .top-link {
+            position: absolute;
+            top: 10px;
+            font-size: 1.2em;
+            color: #007BFF;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .top-link:hover {
+            color: #0056b3;
+        }
+
+        .top-link.left {
+            left: 10px;
+        }
+
+        .top-link.right {
+            right: 10px;
+        }
+
+        .more {
+            border-top: 2px solid rgba(0, 0, 0, 0.1);
+            padding-top: 20px;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 50px auto;
+            background: linear-gradient(135deg, #ffffff, #f0f0f0);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out;
+            position: relative;
+            /* Added for absolute positioning of links */
+        }
+
+        .container:hover {
+            transform: scale(1.01);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 3em;
+            font-weight: 700;
+            margin-bottom: 50px;
+        }
+
+        h1 a {
+            text-decoration: none;
+            color: #007BFF;
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        h1 a:hover {
+            color: #0056b3;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .article {
+            border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+            padding: 25px 0;
+            transition: background-color 0.3s ease;
+        }
+
+        .article:hover {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .theme {
+            font-weight: 500;
+            color: #007BFF;
+            background-color: rgba(0, 123, 255, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .theme:hover {
+            background-color: #007BFF;
+            color: #ffffff;
+        }
+
+        .title {
+            font-size: 1.6em;
+            font-weight: 700;
+            color: #333;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            margin-left: 10px;
+        }
+
+        .title:hover {
+            color: #007BFF;
+            text-decoration: underline;
+        }
+
+        .description {
+            font-size: 1.1em;
+            margin: 15px 0 0 0;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            font-size: 1em;
+            color: #888;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2.2em;
+            }
+
+            .container {
+                padding: 25px;
+            }
+
+            .article {
+                padding: 20px 0;
+            }
+
+            .theme,
+            .title {
+                font-size: 1.4em;
+            }
+        }
+
+        /* Code block styling */
+        code {
+            font-family: 'Source Code Pro', monospace;
+            background-color: #f5f7fa;
+            color: #007BFF;
+            /* Changed to blue */
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.95em;
+            border: 1px solid #e1e4e8;
+        }
+
+        pre {
+            font-family: 'Source Code Pro', monospace;
+            background-color: #f5f7fa;
+            color: #333;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.95em;
+            line-height: 1.6;
+            overflow-x: auto;
+            border: 1px solid #e1e4e8;
+            margin-bottom: 20px;
+        }
+
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            border: none;
+        }
+
+        /* Styling for example divs */
+        .example {
+            background-color: #e9f7fd;
+            border-left: 4px solid #007BFF;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .example h3 {
+            font-size: 1.4em;
+            color: #0056b3;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .example p {
+            color: #555;
+            margin: 0;
+            font-size: 1.1em;
+            line-height: 1.8;
+        }
+
+        .example pre {
+            background-color: #fff;
+            border-left: 4px solid #007BFF;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .example pre code {
+            color: #d6336c;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="content" class="container">
+        <h1><a href="/"><span class="title_main">AutoContentHub</soan></a></h1>
+    </div>
+
+    <script>
+        (async () => {
+            try {
+                // Fetch the HTML content from the route
+                // Extract GET parameters from the current URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const section = urlParams.get('section');
+                const date = urlParams.get('date');
+
+                // Construct the URL for the content based on GET parameters
+                const contentUrl = `/${section}/${date}.html`;
+                const response = await fetch(contentUrl);
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                const htmlText = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlText, 'text/html');
+
+                // Extract the content you want
+                const newContent = doc.body.innerHTML;
+
+                // Get the content container
+                const contentContainer = document.getElementById('content');
+
+                // Clear the current content and add new content
+                contentContainer.innerHTML += newContent;
+
+                // Add a get more #section link
+                contentContainer.innerHTML += `
+                    <div class="more">Get more <a href="/${section}">
+                        <span class="theme">#${section}</span></a>
+                     content</div>
+                `;
+
+                // Remove the footer after the document is loaded
+                const footer = document.querySelector('footer');
+                if (footer) {
+                    footer.remove();
+                }
+                contentContainer.style.display = 'block';
+
+            } catch (error) {
+                console.error('Error loading content:', error);
+            }
+        })();
+    </script>
+</body>
+
+</html>
