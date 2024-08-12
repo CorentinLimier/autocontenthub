@@ -2,9 +2,49 @@
 
 # Concept
 
-This project creates lambda function that runs once a day to ask ChatGPT to create a new content and deploy it to a static website.
+This project creates lambda functions that runs periodically to ask ChatGPT to create new content and deploy it to a static website.
 
-# Resources 
+# Structure of the project 
+
+```
+autocontenthub/
+├── frontend/
+│   ├─ Lambda that creates the main static pages of the websites and deploy it to S3
+
+├── generator/
+│   ├─ Lambda that calls ChatGPT to generate new content
+
+├── static/
+│   ├─ Some static pages : default index.html, error.html and load.html to display ChatGPT generated content with the proper CSS theme
+
+├── terraform/
+│   ├─ Deploy infra to AWS 
+```
+
+# Infrastructure
+
+This project uses (among other things): 
+- AWS Lambda : to generate new content using CHatGPT
+- EventBridge : to schedule lambdas
+- DynamoDB : to store a description of generated content
+- S3 : to store content generated
+- Cloudfront / route 53 to serve the website
+
+# Generate a new section of content
+
+To generate a new type of content, adds an object in variable `contents` in `terraform/variables.tf` 
+
+```
+contents = {
+    <new_section> = "<prompt>"
+}
+```
+
+It will create a new EventBridge event that will trigger the lambda and send the prompt to ChatGPT to generate the content at the fixed schedule. 
+
+New section will be available at route `/<new_section>` of the website. 
+
+# Appendix
 
 - [Create static webpage using terraform](https://dev.to/aws-builders/how-to-create-a-simple-static-amazon-s3-website-using-terraform-43hc)
 - [Deploy a lambda](https://medium.com/@haissamhammoudfawaz/create-a-aws-lambda-function-using-terraform-and-python-4e0c2816753a)
