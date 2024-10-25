@@ -24,7 +24,7 @@ autocontenthub/
 # Infrastructure
 
 This project uses (among other things): 
-- AWS Lambda : to generate new content using CHatGPT
+- AWS Lambda : to generate new content using ChatGPT
 - EventBridge : to schedule lambdas
 - DynamoDB : to store a description of generated content
 - S3 : to store content generated
