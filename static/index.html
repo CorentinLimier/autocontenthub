@@ -2,44 +2,110 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Website Under Maintenance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet" />
     <style>
+        :root {
+            --bg: linear-gradient(135deg, #141e30, #243b55);
+            --card-bg: rgba(255, 204, 0, 0.15);
+            /* translucent yellow */
+            --text: #ffffff;
+            --accent: #ffcc00;
+            /* bright yellow */
+            --shadow: 0 20px 40px rgba(255, 204, 0, 0.6);
+            --radius: 18px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background-color: #f8f9fa;
-            color: #343a40;
-            font-family: Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg);
+            font-family: 'Outfit', sans-serif;
+            color: var(--text);
             text-align: center;
-            padding: 50px;
+            padding: 20px;
         }
 
         .container {
-            max-width: 600px;
-            margin: auto;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            padding: 60px 40px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            max-width: 500px;
+            width: 100%;
+            animation: fadeIn 0.8s ease;
+            color: var(--accent);
         }
 
         h1 {
-            font-size: 48px;
-            margin: 0;
+            font-size: 2.8rem;
+            font-weight: 900;
+            margin-bottom: 15px;
+            color: var(--accent);
+            text-shadow: 0 0 20px rgba(255, 204, 0, 0.6);
         }
 
         h2 {
-            font-size: 24px;
-            margin: 10px 0;
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--accent);
         }
 
         p {
-            font-size: 18px;
+            font-size: 1.1rem;
+            color: rgba(255, 204, 0, 0.85);
+            margin-bottom: 15px;
+            line-height: 1.6;
         }
 
         a {
-            color: #007bff;
+            color: var(--accent);
+            font-weight: 600;
             text-decoration: none;
+            transition: color 0.3s;
         }
 
         a:hover {
+            color: #fff;
             text-decoration: underline;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 500px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            h2 {
+                font-size: 1.3rem;
+            }
+
+            p {
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
@@ -48,8 +114,7 @@
     <div class="container">
         <h1>We'll Be Back Soon!</h1>
         <h2>Website Under Maintenance</h2>
-        <p>We're currently performing some maintenance. We apologize for the inconvenience and appreciate your patience.
-        </p>
+        <p>We're currently performing some updates to improve your experience. We appreciate your patience.</p>
         <p>Please check back later.</p>
     </div>
 </body>

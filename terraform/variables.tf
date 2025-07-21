@@ -40,6 +40,7 @@ variable "contents" {
       Players should use either the mouse to click or the keyboard to control the game or a character.
 
       NO BUG ALLOWED
+      Gameplay should be very different than the previous games you generated.
       EOF
     }
     data = {
@@ -48,13 +49,15 @@ variable "contents" {
       Find a topic/ a technology that is specific and develop it. 
       Article should rely on concrete examples and codes snippets if applicable.
       I want a definitive verison that I can directly publish on my website. 
-      The output should be in one html file. Make surer to escape html characters 
+      The output should be in one html file. If inside the html page there are also
+      html code blocks, make surer to escape html characters 
       inside code blocks if applicable by replacing : 
       - < with &lt;
       - > with &gt;
       - & with &amp;
       - " with &quot;
       - ' with &#39;
+      But only inside code blocks and not on all the page ! 
       EOF
     }
     product = {
@@ -81,13 +84,15 @@ variable "contents" {
       Find a topic/ a technology that is specific and develop it. 
       Article should rely on concrete examples and codes snippets if applicable.
       I want a definitive verison that I can directly publish on my website. 
-      The output should be in one html file. Make sure to escape html characters 
+      The output should be in one html file. If inside the html page there are also
+      html code blocks, make surer to escape html characters 
       inside code blocks if applicable by replacing : 
       - < with &lt;
       - > with &gt;
       - & with &amp;
       - " with &quot;
       - ' with &#39;
+      But only inside code blocks and not on all the page ! 
       EOF
     }
     startup = {
@@ -132,13 +137,15 @@ variable "contents" {
       Find a topic/ a technology that is specific and develop it. 
       Article should rely on concrete examples and codes snippets if applicable.
       I want a definitive verison that I can directly publish on my website. 
-      The output should be in one html file. Make sure to escape html characters 
+      The output should be in one html file. If inside the html page there are also
+      html code blocks, make surer to escape html characters 
       inside code blocks if applicable by replacing : 
       - < with &lt;
       - > with &gt;
       - & with &amp;
       - " with &quot;
       - ' with &#39;
+      But only inside code blocks and not on all the page ! 
       EOF
     }
   }

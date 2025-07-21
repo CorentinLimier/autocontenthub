@@ -15,7 +15,7 @@ def openai_prompt(prompt: str, token: str) -> dict:
     headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
 
     data = {
-        "model": "gpt-4o-mini",
+        "model": "gpt-4.1",
         "messages": [{"role": "user", "content": f"{prompt}"}],
         "temperature": 0.7,
     }
@@ -53,7 +53,7 @@ def get_dynamo_last_items(folder: str) -> list[str]:
         ScanIndexForward=False,
     )
 
-    return [f'{item["title"]}: {item["description"]}' for item in response["Items"]]
+    return [f"{item['title']}: {item['description']}" for item in response["Items"]]
 
 
 def get_secret(secret_name: str) -> str:

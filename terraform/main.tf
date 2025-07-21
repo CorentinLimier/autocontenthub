@@ -431,7 +431,7 @@ resource "aws_lambda_function" "generator_function" {
   role             = aws_iam_role.lambda_role.arn
   runtime          = "python3.10"
   handler          = "lambda_function.lambda_handler"
-  timeout          = 60
+  timeout          = 120
   tags             = aws_servicecatalogappregistry_application.autocontenthub_app.application_tag
 }
 
@@ -458,7 +458,7 @@ resource "aws_cloudwatch_event_rule" "schedule" {
   for_each            = var.contents
   name                = "${each.key}_schedule_rule"
   description         = "trigger generate_content every day"
-  schedule_expression = "cron(5 0 * * ? *)"
+  schedule_expression = "cron(0 3 ? * MON *)"
   tags                = aws_servicecatalogappregistry_application.autocontenthub_app.application_tag
 }
 
@@ -486,7 +486,7 @@ resource "aws_lambda_permission" "allow_cloudwatch" {
 resource "aws_cloudwatch_event_rule" "frontend_schedule" {
   name                = "frontend_schedule_rule"
   description         = "trigger generate_frontend every day"
-  schedule_expression = "cron(10 0 * * ? *)"
+  schedule_expression = "cron(10 3 ? * MON *)"
   tags                = aws_servicecatalogappregistry_application.autocontenthub_app.application_tag
 }
 
