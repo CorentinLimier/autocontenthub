@@ -15,9 +15,9 @@ def openai_prompt(prompt: str, token: str) -> dict:
     headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
 
     data = {
-        "model": "gpt-4.1",
+        "model": "gpt-5",
         "messages": [{"role": "user", "content": f"{prompt}"}],
-        "temperature": 0.7,
+        "reasoning_effort": "low",
     }
 
     encoded_data = json.dumps(data)

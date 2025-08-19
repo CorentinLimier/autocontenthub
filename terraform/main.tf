@@ -431,7 +431,7 @@ resource "aws_lambda_function" "generator_function" {
   role             = aws_iam_role.lambda_role.arn
   runtime          = "python3.10"
   handler          = "lambda_function.lambda_handler"
-  timeout          = 120
+  timeout          = 180
   tags             = aws_servicecatalogappregistry_application.autocontenthub_app.application_tag
 }
 
